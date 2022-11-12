@@ -1,0 +1,38 @@
+class Conect4
+class Player
+class Board
+abstract Piece
+class Turn
+class Red
+class Yellow
+abstract Goal
+class Horizontal
+class Vertical
+class Diagonal
+class Movement
+class Cell
+
+Conect4 *-->"2" Player
+Conect4 *--> Board
+Conect4 *--> Turn
+
+Player --> Board
+Player *--> Goal
+Player ..> Piece
+Turn --> Player
+
+Board o--> Piece
+Board *-->"6x7" Cell
+
+Piece <|-- Red
+Piece <|-- Yellow
+Piece o--> Cell
+Piece o--> Movement
+
+Goal o--> Movement
+Goal <|-- Horizontal
+Goal <|-- Vertical
+Goal <|-- Diagonal
+
+Movement ..> Cell
+
