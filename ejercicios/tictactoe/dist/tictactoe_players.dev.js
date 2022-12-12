@@ -14,18 +14,82 @@ function playTicTacToe() {
   function playGame() {
     var turn = 0;
     var isFinish = false;
-    var tie = false;
+    var gamers;
     var MAX_TOKENS = 3;
     var TOKEN_EMPTY = " ";
     var tokens = [[TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY], [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY], [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY]];
+    var modePlayers = askForPlayers();
 
     do {
       writeTokens(tokens);
-      placeToken(tokens, turn);
+      modePlayers[turn](tokens, turn);
       turn = nextTurn(turn);
     } while (!isFinish);
 
     writeTokens(tokens);
+
+    function machine(tokens, turn) {
+      console.writeln("Turno para: ".concat(getTurn(turn)));
+      var targetRow;
+      var targetCol;
+      var error;
+
+      do {
+        targetRow = parseInt(Math.random() * 3);
+        targetCol = parseInt(Math.random() * 3);
+        error = !isEmpty(tokens, targetRow, targetCol);
+      } while (error);
+
+      tokens[targetRow][targetCol] = getTurn(turn);
+      isTicTacToe(tokens);
+
+      function getRandowmRow(tokens) {}
+    }
+
+    function human(tokens, turn) {
+      console.writeln("Turno para: ".concat(getTurn(turn)));
+      var targetRow;
+      var targetCol;
+      var error;
+
+      do {
+        targetRow = readTarget("Fila destino");
+        targetCol = readTarget("Columna destino");
+        error = !isEmpty(tokens, targetRow, targetCol);
+
+        if (error) {
+          console.writeln("casilla ya ocupada");
+        }
+      } while (error);
+
+      tokens[targetRow][targetCol] = getTurn(turn);
+      isTicTacToe(tokens);
+    }
+
+    function askForPlayers() {
+      var error;
+      var players;
+
+      do {
+        players = console.readNumber("\xBFCu\xE1ntos jugadores vais a ser 0, 1 o 2 ?");
+        error = players > 2 || players < 0;
+
+        if (error) {
+          console.writeln("jugadores tienen que ser entre 0 y 2");
+        }
+      } while (error);
+
+      switch (players) {
+        case 2:
+          return gamers = [human, human];
+
+        case 1:
+          return gamers = [human, machine];
+
+        case 0:
+          return gamers = [machine, machine];
+      }
+    }
 
     function nextTurn(turn) {
       return turn === 0 ? 1 : 0;
@@ -155,26 +219,6 @@ function playTicTacToe() {
 
       msg += HORIZONTAL_SEPARTOR;
       console.writeln(msg);
-    }
-
-    function placeToken(tokens, turn) {
-      console.writeln("Turno para: ".concat(getTurn(turn)));
-      var targetRow;
-      var targetCol;
-      var error;
-
-      do {
-        targetRow = readTarget("Fila destino");
-        targetCol = readTarget("Columna destino");
-        error = !isEmpty(tokens, targetRow, targetCol);
-
-        if (error) {
-          console.writeln("casilla ya ocupada");
-        }
-      } while (error);
-
-      tokens[targetRow][targetCol] = getTurn(turn);
-      isTicTacToe(tokens);
     }
 
     function getTurn(turn) {

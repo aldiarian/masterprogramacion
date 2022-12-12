@@ -1,6 +1,6 @@
 "use strict";
 
-var _require = require("./console"),
+var _require = require("console-mpds"),
     Console = _require.Console;
 
 var console = new Console();
@@ -16,12 +16,13 @@ function playTicTacToe() {
     var MAX_TOKENS = 3;
     var TOKEN_EMPTY = " ";
     var tokens = [[TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY], [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY], [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY]];
+    var computerOrHumanPlaceTokenFunctions = getPlayersModes();
     var turn = 0;
     var winner;
 
     do {
       writelnTokens(tokens);
-      placeToken(tokens, turn);
+      computerOrHumanPlaceTokenFunctions[turn](tokens, turn);
       winner = isTicTacToe(tokens, turn);
 
       if (!winner) {
@@ -32,14 +33,62 @@ function playTicTacToe() {
     writelnTokens(tokens);
     console.writeln("Victoria para ".concat(getToken(turn)));
 
-    function placeToken(tokens, turn) {
+    function getPlayersModes() {
+      var numPlayers;
+      var error;
+
+      do {
+        numPlayers = console.readNumber("\xBFCu\xE1ntos jugadores hay?[0,1,2]: ");
+        error = numPlayers < 0 || numPlayers > 2;
+
+        if (error) {
+          console.writeln("ERROR: Por favor, introduce un n\xFAmero de jugadores v\xE1lido");
+        }
+      } while (error);
+
+      return [[placeRandomToken, placeRandomToken], [placeHumanToken, placeRandomToken], [placeHumanToken, placeHumanToken]][numPlayers];
+    }
+
+    function placeRandomToken(tokens, turn) {
       console.writeln("Turno para ".concat(getToken(turn)));
       var error;
+      var movement = getNumTokens(tokens) === MAX_PLAYERS * MAX_TOKENS;
       var originRow;
       var originColumn;
+
+      if (movement) {
+        do {
+          originRow = parseInt(Math.random() * tokens.length);
+          originColumn = parseInt(Math.random() * tokens[0].length);
+          error = !isOccupied(tokens, originRow, originColumn, turn);
+        } while (error);
+      }
+
+      var targetRow;
+      var targetColumn;
+
+      do {
+        targetRow = parseInt(Math.random() * tokens.length);
+        targetColumn = parseInt(Math.random() * tokens[0].length);
+        error = !isEmpty(tokens, targetRow, targetColumn);
+      } while (error);
+
+      if (movement) {
+        tokens[originRow][originColumn] = TOKEN_EMPTY;
+      }
+
+      tokens[targetRow][targetColumn] = getToken(turn);
+    }
+
+    function placeHumanToken(tokens, turn) {
+      console.writeln("Turno para ".concat(getToken(turn)));
+      var error;
       var movement = getNumTokens(tokens) === MAX_PLAYERS * MAX_TOKENS;
 
       if (movement) {
+        var originRow;
+        var originColumn;
+
         do {
           originRow = read("Fila origen");
           originColumn = read("Columna origen");
@@ -49,6 +98,8 @@ function playTicTacToe() {
             console.writeln("No hay una ficha de la propiedad de ".concat(getToken(turn)));
           }
         } while (error);
+
+        tokens[originRow][originColumn] = TOKEN_EMPTY;
       }
 
       var targetRow;
@@ -63,10 +114,6 @@ function playTicTacToe() {
           console.writeln("Indique una celda vac\xEDa");
         }
       } while (error);
-
-      if (movement) {
-        tokens[originRow][originColumn] = TOKEN_EMPTY;
-      }
 
       tokens[targetRow][targetColumn] = getToken(turn);
     }
@@ -91,7 +138,7 @@ function playTicTacToe() {
 
       do {
         position = console.readNumber("".concat(title, ": "));
-        error = position < 1 || 3 < position;
+        error = position < 1 || MAX_TOKENS < position;
 
         if (error) {
           console.writeln("Por favor un numero entre 1 y ".concat(MAX_TOKENS, " inclusives"));
@@ -185,7 +232,7 @@ function playTicTacToe() {
     var error = false;
 
     do {
-      answer = console.readString("\xBFQuieres jugar otra partida? ");
+      answer = console.readString("\xBFQuieres jugar otra partida?[si/no] ");
       result = answer === "si";
       error = !result && answer !== "no";
 

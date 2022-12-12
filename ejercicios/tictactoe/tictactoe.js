@@ -13,7 +13,6 @@ function playTicTacToe(){
   function playGame(){
     let turn = 0;
     let isFinish = false;
-    let tie = false;
     const MAX_TOKENS = 3;
     const TOKEN_EMPTY = ` `;
     let tokens = [
