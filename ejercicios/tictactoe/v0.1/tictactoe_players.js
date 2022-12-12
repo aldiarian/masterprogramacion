@@ -1,4 +1,4 @@
-const { Console } = require("./console");
+const { Console } = require("../console");
 const console = new Console();
 
 playTicTacToe();
@@ -32,46 +32,42 @@ function playTicTacToe() {
     
     writeTokens(tokens);
 
-    function machine(tokens, turn){
-        console.writeln(`Turno para: ${getTurn(turn)}`)
-        let targetRow;
-        let targetCol;
-        let error;
-       
-        do {
-          targetRow = parseInt(Math.random()*3);
-          targetCol = parseInt(Math.random()*3);
-          error = !isEmpty(tokens, targetRow, targetCol)
-        } while (error);
 
-        tokens[targetRow][targetCol] = getTurn(turn);
-        isTicTacToe(tokens);
+    function placeTokenS(tokens, turn, player = 'human'){
 
-        function getRandowmRow(tokens){
-
-
-        }
-    }
-    
-    function human(tokens, turn) {
       console.writeln(`Turno para: ${getTurn(turn)}`)
       let targetRow;
       let targetCol;
       let error;
+      
       do {
-        targetRow = readTarget(`Fila destino`);
-        targetCol = readTarget(`Columna destino`);
-        error = !isEmpty(tokens, targetRow, targetCol)
-        if (error) {
-          console.writeln(`casilla ya ocupada`)
+        if ( player == 'machine'){
+          targetRow = parseInt( Math.random()* MAX_TOKENS ) ;
+          targetCol = parseInt( Math.random()* MAX_TOKENS ) ;
+          error = !isEmpty(tokens, targetRow, targetCol)
+        } else {
+          targetRow = readTarget(`Fila destino`);
+          targetCol = readTarget(`Columna destino`);
+          error = !isEmpty(tokens, targetRow, targetCol)
+          if (error) {
+            console.writeln(`casilla ya ocupada`)
+          }
         }
+
       } while (error);
+
       tokens[targetRow][targetCol] = getTurn(turn);
       isTicTacToe(tokens);
 
-
     }
 
+    function machine(tokens, turn){
+      placeTokenS( tokens, turn, player = 'machine')
+    }
+    
+    function human(tokens, turn) {
+      placeTokenS( tokens, turn, player = 'human')
+    }
 
     function askForPlayers() {
       let error;
@@ -83,15 +79,7 @@ function playTicTacToe() {
           console.writeln(`jugadores tienen que ser entre 0 y 2`)
         }
       } while (error);
-      
-      switch(players){
-        case 2:
-          return gamers = [ human, human ]
-        case 1:
-          return gamers = [ human, machine ]
-        case 0:
-          return gamers = [ machine, machine ]
-      }
+      return [[ machine, machine ],[ human, machine ],[ human, human ]][players];
     }
 
     function nextTurn(turn) {
@@ -211,7 +199,6 @@ function playTicTacToe() {
 
       console.writeln(msg)
     }
-
 
     function getTurn(turn) {
       let TURN_X = 'X';

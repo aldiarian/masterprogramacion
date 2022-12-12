@@ -1,6 +1,6 @@
 "use strict";
 
-var _require = require("./console"),
+var _require = require("../console"),
     Console = _require.Console;
 
 var console = new Console();

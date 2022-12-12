@@ -1,6 +1,6 @@
 "use strict";
 
-var _require = require("./console"),
+var _require = require("../console"),
     Console = _require.Console;
 
 var console = new Console();
@@ -13,7 +13,7 @@ function playTicTacToe() {
 
   function playGame() {
     var turn = 0;
-    var winner = false;
+    var isFinish = false;
     var MAX_TOKENS = 3;
     var TOKEN_EMPTY = " ";
     var tokens = [[TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY], [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY], [TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY]];
@@ -21,9 +21,8 @@ function playTicTacToe() {
     do {
       writeTokens(tokens);
       placeToken(tokens, turn);
-      getNumTokens(tokens);
       turn = nextTurn(turn);
-    } while (!winner);
+    } while (!isFinish);
 
     writeTokens(tokens);
 
@@ -32,12 +31,29 @@ function playTicTacToe() {
     }
 
     function isTicTacToe(tokens) {
-      var full = false;
-      var first;
-      checkRow(tokens);
-      checkCol(tokens);
-      checkCrossLeft(tokens);
-      checkCrossRight(tokens);
+      if (getNumTokensEmpties(tokens, TOKEN_EMPTY) != 0) {
+        checkRow(tokens);
+        checkCol(tokens);
+        checkCrossLeft(tokens);
+        checkCrossRight(tokens);
+      } else {
+        console.writeln("EMPATE");
+        isFinish = true;
+      }
+
+      function getNumTokensEmpties(tokens, tokenEmpty) {
+        var empties = 0;
+
+        for (var i = 0; i < tokens.length; i++) {
+          for (var j = 0; j < tokens[i].length; j++) {
+            if (tokens[i][j] === tokenEmpty) {
+              empties++;
+            }
+          }
+        }
+
+        return empties;
+      }
 
       function checkCrossLeft(tokens) {
         var testBox = ['0', '0', '0'];
@@ -117,17 +133,7 @@ function playTicTacToe() {
         console.writeln("-----------------------------------");
         console.writeln("l\xEDnea ".concat(msg, "\ngana: ").concat(getTurn(turn)));
         console.writeln("-----------------------------------");
-        winner = true;
-      }
-    }
-
-    function getNumTokens(tokens) {
-      var empty = 0;
-
-      for (var i = 0; i < tokens.length; i++) {
-        for (var j = 0; j < tokens[i].length; j++) {
-          tokens[i][j] === TOKEN_EMPTY ? empty++ : false;
-        }
+        isFinish = true;
       }
     }
 

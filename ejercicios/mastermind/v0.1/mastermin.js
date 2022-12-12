@@ -19,7 +19,7 @@ function mastermind(){
 
         
         let secretCombination = createSecretCombination(COLORS, COMBINATION_LENGTH);
-        // secretCombination = 'bycr';
+        // let secretCombination = 'bycr';
         console.writeln(`secret: ${secretCombination}\n`)
         console.writeln(`----- MASTERMIND -----\n`)
 

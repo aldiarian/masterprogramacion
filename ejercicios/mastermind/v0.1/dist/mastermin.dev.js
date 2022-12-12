@@ -18,7 +18,7 @@ function mastermind() {
     var attempts = 0;
     var storageAttempts = "";
     var winner;
-    var secretCombination = createSecretCombination(COLORS, COMBINATION_LENGTH); // secretCombination = 'bycr';
+    var secretCombination = createSecretCombination(COLORS, COMBINATION_LENGTH); // let secretCombination = 'bycr';
 
     console.writeln("secret: ".concat(secretCombination, "\n"));
     console.writeln("----- MASTERMIND -----\n");
