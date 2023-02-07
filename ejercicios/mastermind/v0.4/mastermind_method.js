@@ -2,54 +2,59 @@ const { Console } = require("console-mpds");
 const console = new Console();
 
 
-mastermind()
+ mastermind().play();
+
 
 function mastermind(){
-    let askContinue = askQuestionYesNo(`¿Quieres jugar otra partida?`);
-    do {
-        let game = initGame();
-        game.play()
-        askContinue.ask();
-
-    } while ( askContinue.isYes());
+    return {
+        play(){
+            let askContinue = askQuestionYesNo(`¿Quieres jugar otra partida?`);
+            do {
+                let game = initGame();
+                game.play()
+                askContinue.ask();
+        
+            } while ( askContinue.isYes());
+        }
+    }
 
 }
 
 function initGame(){
-    console.writeln(`----- MASTERMIND -----\n`);
-    let secretComb = secretCombination().generate();
-    console.writeln(`secret: ${secretComb}`);
+    const MAX_ATTEMPS = 4;
+    let attempts = 0;
+    let storageAttempts = ``;
+    let winner= ``;
     return {
-        MAX_ATTEMPS : 4,
-        attempts : 0,
-        storageAttempts : ``,
-        winner: ``,
-
         play(){
+            console.writeln(`\n----- MASTERMIND -----`);
+            let secretComb = secretCombination().generate();
+            console.writeln(`secret: ${secretComb}\n`);
 
             do {
-                console.writeln(`${this.attempts} attempt(s):`);
+                console.writeln(`${attempts} attempt(s):`);
                 console.writeln(`****`);
-                if ( this.attempts > 0) {
-                    console.writeln(`${this.storageAttempts}`)
+                if ( attempts > 0) {
+                    console.writeln(`${storageAttempts}`)
                 }
                 let combinationPropoused =  proposeCombination().propouse();
-                this.storageAttempts += `${combinationPropoused} ---> ${checkBlackWhites(combinationPropoused, secretComb)}`;
+                storageAttempts += `${ combinationPropoused } ---> ${ checkBlackWhites(combinationPropoused, secretComb) }`;
                 
                 if ( secretComb === combinationPropoused){
-                    console.writeln(`${this.storageAttempts}`)
-                    this.winner = true;
+                    console.writeln(`${storageAttempts}`)
+                    winner = true;
                 } else {
-                    this.attempts++;
+                    attempts++;
                 }
     
-            } while (!this.winner && this.attempts < this.MAX_ATTEMPS );
+            } while (!winner && attempts < MAX_ATTEMPS );
             
-            if(this.winner) { 
+            if(winner) { 
                 console.writeln(`You've won!!!`) }
             else {
-                console.writeln(`${this.attempts} attempt(s):`);
-                console.writeln(`${this.storageAttempts}`)
+                console.writeln(`${attempts} attempt(s):`);
+                console.writeln(`****`);
+                console.writeln(`${storageAttempts}`)
                 console.writeln(`You've lost!!!`)
             }
 
@@ -64,8 +69,7 @@ function checkBlackWhites(combinationPropoused, secretComb){
     let whites = 0;
     for (let i = 0; i < secretCombination().getLength(); i++) {
         for (let j = 0;  j < secretCombination().getLength(); j++) {
-            exist = combinationPropoused[i]  === secretComb[j]
-            if (exist) {
+            if (  exist = combinationPropoused[i]  === secretComb[j] ) {
                 ( i === j )? blacks++ : whites++;
             }
         }
@@ -76,37 +80,37 @@ function checkBlackWhites(combinationPropoused, secretComb){
 
 
 function secretCombination(){
+    const COLORS = [ 'r','y','b','g','m','c'];
+    const COMBINATION_LENGTH = 4;
+    let combination = ``;
     return {
-        COLORS : [ 'r','y','b','g','m','c'],
-        COMBINATION_LENGTH: 4,
-        combination : ``,
         generate: function(){
             let element;
             do {
                 let exist;
-                element = this.COLORS[parseInt(Math.random()* this.COLORS.length)];
-                for (let i = 0;  !exist && i < this.COMBINATION_LENGTH; i++) {
-                    exist = element === this.combination[i];
+                element = COLORS[parseInt(Math.random()* COLORS.length)];
+                for (let i = 0;  !exist && i < COMBINATION_LENGTH; i++) {
+                    exist = element === combination[i];
                 }
-                !exist ? this.combination += element : false;
-            } while (this.combination.length < this.COMBINATION_LENGTH);
-            return this.combination;
+                !exist ? combination += element : false;
+            } while (combination.length < COMBINATION_LENGTH);
+            return combination;
         },
         getColors: function(){
-            return this.COLORS;
+            return COLORS;
         },
         getLength: function(){
-            return this.COMBINATION_LENGTH
+            return COMBINATION_LENGTH
         }
     }
 }
 
 
 function proposeCombination(){
-    let isCorrect = false;
     let combinationPropoused; 
     return {
-        propouse: function(){
+        propouse(){
+            let isCorrect = '';
             do {
                 combinationPropoused = console.readString('Propose a combination: ');
                 console.writeln();
@@ -118,7 +122,7 @@ function proposeCombination(){
             } while (!isCorrect );
             return combinationPropoused
         },
-        checkLengh: function(){
+        checkLengh(){
             if (combinationPropoused.length < secretCombination().getLength() || combinationPropoused.length > secretCombination().getLength())  { 
                 console.writeln('Wrong proposed combination length') 
                 return false;
@@ -126,7 +130,7 @@ function proposeCombination(){
                 return true;
             }
         },
-        checkRepeated: function(){
+        checkRepeated(){
             let isRepeated;
             for (let i = 0; i < combinationPropoused.length - 1 ; i++) {
                 for (let j = i + 1 ; !isRepeated && j < combinationPropoused.length; j++) {
@@ -140,7 +144,7 @@ function proposeCombination(){
                 return true;
             }
         },
-        checkCorrectColor: function() {
+        checkCorrectColor() {
             let colorOk;
             for (let i = 0; i < secretCombination().getLength(); i++) {
                 colorOk = false;
@@ -159,22 +163,21 @@ function proposeCombination(){
 }
 
 function askQuestionYesNo( question ){
+    let answer = ``;
     return {
-        question: question,
-        answer : ``,
-        ask: function(){
+        ask(){
             let error = false;
             do {
-                this.answer = console.readString(this.question);
+                answer = console.readString(question);
                 error = !this.isYes() && !this.isNo();
                 if(error) console.writeln(`Please response "yes" or "no"`)
             } while (error);
         },
-        isYes: function(){
-            return this.answer == 'yes'
+        isYes(){
+            return answer == 'yes'
         },
-        isNo: function(){
-            return this.answer == 'no'
+        isNo(){
+            return answer == 'no'
         }
     }
 }

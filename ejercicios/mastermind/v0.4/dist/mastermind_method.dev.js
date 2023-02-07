@@ -17,15 +17,16 @@ function mastermind() {
 }
 
 function initGame() {
-  console.writeln("----- MASTERMIND -----\n");
-  var secretComb = secretCombination().generate();
-  console.writeln("secret: ".concat(secretComb));
   return {
     MAX_ATTEMPS: 4,
     attempts: 0,
     storageAttempts: "",
     winner: "",
     play: function play() {
+      console.writeln("\n----- MASTERMIND -----");
+      var secretComb = secretCombination().generate();
+      console.writeln("secret: ".concat(secretComb, "\n"));
+
       do {
         console.writeln("".concat(this.attempts, " attempt(s):"));
         console.writeln("****");
