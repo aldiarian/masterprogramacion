@@ -6,12 +6,11 @@ const console = new Console();
 
 
 function mastermind(){
-    let askContinue = askQuestionYesNo(`¿Quieres jugar otra partida?`);
+    const askContinue = askQuestionYesNo(`¿Quieres jugar otra partida?`);
     return {
         play(){
             do {
-                let game = initGame();
-                game.play()
+                initGame().play()
                 askContinue.ask();
         
             } while ( askContinue.isYes());
@@ -20,6 +19,16 @@ function mastermind(){
 
 }
 
+function initGameView(){
+    return{
+        show(msg){
+            return console.writeln(msg) 
+        },
+        ask(msg){
+            return console.readString(msg)
+        }
+    }
+}
 function initGame(){
     const MAX_ATTEMPS = 4;
     let attempts = 0;
@@ -28,19 +37,19 @@ function initGame(){
     return {
         play(){
             let secretComb = secretCombination().generate();
-            console.writeln(`\n----- MASTERMIND -----`);
-            console.writeln(`secret: ${secretComb}\n`);
+            initGameView().show(`\n----- MASTERMIND -----`);
+            initGameView().show(`secret: ${secretComb}\n`);
 
             do {
-                console.writeln(`${attempts} attempt(s):\n****`);
+                initGameView().show(`${attempts} attempt(s):\n****`);
                 if ( attempts > 0) {
-                    console.writeln(`${storageAttempts}`)
+                    initGameView().show(`${storageAttempts}`)
                 }
                 let combinationPropoused =  proposeCombination().propouse();
                 storageAttempts += `${ combinationPropoused } ---> ${ checkBlackWhites(combinationPropoused, secretComb) }`;
                 
                 if ( secretComb === combinationPropoused){
-                    console.writeln(`${storageAttempts}`)
+                    initGameView().show(`${storageAttempts}`)
                     winner = true;
                 } else {
                     attempts++;
@@ -49,12 +58,12 @@ function initGame(){
             } while (!winner && attempts < MAX_ATTEMPS );
             
             if(winner) { 
-                console.writeln(`You've won!!!`) }
+                initGameView().show(`You've won!!!`) }
             else {
-                console.writeln(`${attempts} attempt(s):`);
-                console.writeln(`****`);
-                console.writeln(`${storageAttempts}`)
-                console.writeln(`You've lost!!!`)
+                initGameView().show(`${attempts} attempt(s):`);
+                initGameView().show(`****`);
+                initGameView().show(`${storageAttempts}`)
+                initGameView().show(`You've lost!!!`)
             }
 
         },
@@ -105,17 +114,27 @@ function secretCombination(){
 }
 
 
+
+function proposeCombinationView(){
+    return{
+        show(msg){
+            return console.writeln(msg) 
+        },
+        ask(msg){
+            return console.readString(msg)
+        }
+    }
+}
 function proposeCombination(){
-    let combinationPropoused; 
-    function checkLengh(){
+    function checkLengh(combinationPropoused){
         if (combinationPropoused.length < secretCombination().getLength() || combinationPropoused.length > secretCombination().getLength())  { 
-            console.writeln('Wrong proposed combination length') 
+            proposeCombinationView().show('Wrong proposed combination length') 
             return false;
         } else{
             return true;
         }
     };
-    function checkRepeated(){
+    function checkRepeated(combinationPropoused){
         let isRepeated;
         for (let i = 0; i < combinationPropoused.length - 1 ; i++) {
             for (let j = i + 1 ; !isRepeated && j < combinationPropoused.length; j++) {
@@ -123,13 +142,13 @@ function proposeCombination(){
             }
         }
         if (isRepeated) {
-            console.writeln(`Error, at least one color is repetead`)
+             proposeCombinationView().show(`Error, at least one color is repetead`)
             return false;
         } else {
             return true;
         }
     };
-    function checkCorrectColor() {
+    function checkCorrectColor(combinationPropoused) {
         let colorOk;
         for (let i = 0; i < secretCombination().getLength(); i++) {
             colorOk = false;
@@ -138,7 +157,7 @@ function proposeCombination(){
             }
         } 
         if (!colorOk) {
-            console.writeln(`Wrong colors, they must be: ${secretCombination().getColors()}`) 
+             proposeCombinationView().show(`Wrong colors, they must be: ${secretCombination().getColors()}`) 
             return false;
         } else {
             return true;
@@ -146,12 +165,13 @@ function proposeCombination(){
     };
     return {
         propouse(){
-            let isCorrect = '';
+            let combinationPropoused; 
+            let isCorrect;
             do {
-                combinationPropoused = console.readString('Propose a combination: ');
-                if ( isCorrect = checkCorrectColor()){
-                    if( isCorrect = checkLengh()){
-                        isCorrect = checkRepeated()
+                combinationPropoused = proposeCombinationView().ask('Propose a combination: ');
+                if ( isCorrect = checkCorrectColor(combinationPropoused)){
+                    if( isCorrect = checkLengh(combinationPropoused)){
+                        isCorrect = checkRepeated(combinationPropoused)
                     }
                 }
             } while (!isCorrect );
@@ -160,19 +180,27 @@ function proposeCombination(){
     }
 }
 
+
+function askQuestionYesNoView(){
+    return{
+        ask(msg){
+            return console.readString(msg)
+        }
+    }
+}
 function askQuestionYesNo( question ){
     let answer = ``;
     return {
         ask(){
             let error = ``;
             do {
-                answer = console.readString(question);
+                answer = askQuestionYesNoView().ask(question);
                 error = !this.isYes() && !this.isNo();
-                if(error) console.writeln(`Please response "yes" or "no"`)
+                if(error) askQuestionYesNoView().ask(`Por favor responda "si" o "no"`)
             } while (error);
         },
         isYes(){
-            return answer == 'yes'
+            return answer == 'si'
         },
         isNo(){
             return answer == 'no'
