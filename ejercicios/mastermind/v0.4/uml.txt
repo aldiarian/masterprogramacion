@@ -1,0 +1,23 @@
+class MasterMind
+class AskQuestionYesNo
+class Game
+class CheckBlackWhites
+class SecretCombination
+class Combination
+class PropouseCombination
+
+
+MasterMind *--> AskQuestionYesNo
+MasterMind *--> Game
+Game *--> SecretCombination
+Game *--> PropouseCombination
+Game ..> CheckBlackWhites
+SecretCombination *--> Combination
+PropouseCombination *--> Combination
+
+
+
+
+
+
+https://www.planttext.com/
