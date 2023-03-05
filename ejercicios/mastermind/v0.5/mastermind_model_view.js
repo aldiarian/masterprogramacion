@@ -27,8 +27,8 @@ function initGameView(){
     return {
         play(){
             let secretComb = secretCombination().generate();
-           console.writeln(`\n----- MASTERMIND -----`);
-           console.writeln(`secret: ${secretComb}\n`);
+            console.writeln(`\n----- MASTERMIND -----`);
+            console.writeln(`secret: ${secretComb}\n`);
 
             do {
                console.writeln(`${attempts} attempt(s):\n****`);
@@ -59,7 +59,6 @@ function initGameView(){
         },
     }
 }
-
 
 function checkBlackWhites( combinationPropoused, secretComb ){
     let exist;
