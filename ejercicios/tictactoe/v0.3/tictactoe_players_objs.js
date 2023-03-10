@@ -1,45 +1,55 @@
 const { Console } = require("../console");
 const console = new Console();
 
-playTicTacToe();
+tictactoeView().play();
 
-function playTicTacToe() {
+function tictactoeView() {
+  const askContinueView = initAskContinueView(`¿Quieres jugar otra partida? si / no`);
+  return{
+    play(){
+      do {
+        initPlayGameView().play();
+        askContinueView.ask();
+      } while (askContinueView.isYes());
+    }
+  }
 
-  do {
-    playGame()
-  } while (newPlay())
 
-
-  function playGame() {
-    let isFinish = false;
-    let gameObj = initGame();
-    let modePlayers = askForPlayers();
-
-    do {
-      writePanel(gameObj);
-      modePlayers[gameObj.turn](gameObj)
-      gameObj.turn = nextTurn(gameObj);
-    } while (!isFinish);
-    
-    writePanel(gameObj);
-
-    function initGame(){
-      let gameValues = {
-        turn : 0,
-        MAX_TOKENS : 3,
-        TOKEN_EMPTY : ` `,
-        tokens:[]
-      };
-      for (let i = 0; i < gameValues.MAX_TOKENS; i++) {
-        gameValues.tokens[i] = [];
-        for (let j = 0; j < gameValues.MAX_TOKENS; j++) {
-          gameValues.tokens[i][j] = gameValues.TOKEN_EMPTY;
-        }
+  function initPlayGameView(){
+    let game = initPlayGame();
+    return{
+      play(){
+        do {
+          game.writeTokensView();
+          game.play();
+          setTurn();
+        } while (!game.isFinish());
+        
+        writeTokensView(gameObj);
       }
-      return gameValues;
     }
 
-    function placeTokenS(gameObj, player = 'human'){
+  }
+
+  function initPlayGame() {
+    let modePlayers;
+    let isFinish = false;
+    let gameObj = initGameObj();
+
+
+    function machine(){
+      return this.placeTokens('machine');
+    };
+    
+    function human() {
+      return placeTokens('human');
+    };
+
+    function saluda(){
+      return console.writeln(`hola`)
+    };
+
+    function placeTokens(player) {
 
       console.writeln(`Turno para: ${getTurn(gameObj)}`)
       let targetRow;
@@ -62,37 +72,16 @@ function playTicTacToe() {
 
       } while (error);
 
-      gameObj.tokens[targetRow][targetCol] = getTurn(gameObj);
+      gameObj.tokens[targetRow][targetCol] = this.getTurn(gameObj);
       isTicTacToe(gameObj);
 
-    }
-
-    function machine(gameObj){
-      placeTokenS( gameObj, player = 'machine')
-    }
-    
-    function human(gameObj) {
-      placeTokenS( gameObj, player = 'human')
-    }
-
-    function askForPlayers() {
-      let error;
-      let players;
-      do {
-        players = console.readNumber(`¿Cuántos jugadores vais a ser 0, 1 o 2 ?`);
-        error = players > 2 || players < 0
-        if (error) {
-          console.writeln(`jugadores tienen que ser entre 0 y 2`)
-        }
-      } while (error);
-      return [[ machine, machine ],[ human, machine ],[ human, human ]][players];
-    }
+    };
 
     function nextTurn(nextTurn) {
       return nextTurn.turn === 0 ? 1 : 0;
-    }
+    };
 
-    function isTicTacToe(gameObj) {
+    function isTicTacToe() {
       if ( getNumTokensEmpties(gameObj) != 0 ) {
         checkRow(gameObj)
         checkCol(gameObj)
@@ -100,7 +89,7 @@ function playTicTacToe() {
         checkCrossRight(gameObj)
       } else {
         console.writeln(`EMPATE`);
-        isFinish = true;
+        this.isFinish = true;
       }
 
 
@@ -188,35 +177,14 @@ function playTicTacToe() {
         isFinish = true;
       }
 
-    }
+    };
 
-    function writePanel(gameObj) {
-      const HORIZONTAL_SEPARTOR = `-------------`;
-      const VERTICAL_SEPARATOR = `|`;
-      let msg = ``;
-      for (let i = 0; i < gameObj.tokens.length; i++) {
-        msg += `${HORIZONTAL_SEPARTOR}\n`;
-        for (let j = 0; j < gameObj.tokens[i].length; j++) {
-          msg += `${VERTICAL_SEPARATOR} ${gameObj.tokens[i][j]} `;
-        }
-        msg += `${VERTICAL_SEPARATOR}\n`;
-      }
-      msg += `${HORIZONTAL_SEPARTOR}\n`;
 
-      console.writeln(msg)
-    }
-
-    function getTurn(gameObj) {
-      let TURN_X = 'X';
-      let TURN_Y = 'Y';
-      return gameObj.turn === 0 ? TURN_X : TURN_Y
-    }
-
-    function isEmpty(gameObj, targetRow, targetCol) {
+    function isEmpty( targetRow, targetCol) {
       return gameObj.tokens[targetRow][targetCol] === gameObj.TOKEN_EMPTY;
-    }
+    };
 
-    function readTarget(title, gameObj) {
+    function readTarget(title) {
       let position;
       do {
         position = console.readNumber(`${title}:`);
@@ -228,22 +196,96 @@ function playTicTacToe() {
       } while (error);
       return position - 1;
     }
+    function  askForPlayers() {
+      let error;
+      let players;
+      do {
+        players = console.readNumber(`¿Cuántos jugadores vais a ser 0, 1 o 2 ?`);
+        error = players > 2 || players < 0
+        if (error) {
+          console.writeln(`jugadores tienen que ser entre 0 y 2`)
+        }
+      } while (error);
+      modePlayers = [[ machine, machine ],[ human, machine ],[ human, human ]][players];
+    }
 
+    function getTurn() {
+      let TURN_X = 'X';
+      let TURN_Y = 'Y';
+      return gameObj.turn === 0 ? TURN_X : TURN_Y
+    };
+
+    
+    function setTurn(){
+      return gameObj.turn === 0 ? 1 : 0;
+    };
+
+    return{
+      
+      play(){
+        askForPlayers();
+        modePlayers[gameObj.turn]();
+      },
+
+      writeTokensView() {
+        const HORIZONTAL_SEPARTOR = `-------------`;
+        const VERTICAL_SEPARATOR = `|`;
+        let msg = ``;
+        for (let i = 0; i < gameObj.tokens.length; i++) {
+          msg += `${HORIZONTAL_SEPARTOR}\n`;
+          for (let j = 0; j < gameObj.tokens[i].length; j++) {
+            msg += `${VERTICAL_SEPARATOR} ${gameObj.tokens[i][j]} `;
+          }
+          msg += `${VERTICAL_SEPARATOR}\n`;
+        }
+        msg += `${HORIZONTAL_SEPARTOR}\n`;
+  
+        console.writeln(msg)
+      },  
+      isFinish(){
+        return isFinish == true;
+      }
+    }
   }
 
-  function newPlay() {
-    let result;
-    let answer;
-    let error = false;
-    do {
-      answer = console.readString(`¿Quieres jugar otra partida? si / no`);
-      result = answer === `si`; // true o false
-      error = !result && answer !== `no`; // result diferente de 'si' y es diferente de 'no'
-      if (error) {
-        console.writeln(`Por favor, responda "si" o "no"`);
+
+
+
+
+  function initGameObj(){
+    let gameObj = {
+      turn : 0,
+      MAX_TOKENS : 3,
+      TOKEN_EMPTY : ` `,
+      tokens:[]
+    };
+    for (let i = 0; i < gameObj.MAX_TOKENS; i++) {
+      gameObj.tokens[i] = [];
+      for (let j = 0; j < gameObj.MAX_TOKENS; j++) {
+        gameObj.tokens[i][j] = gameObj.TOKEN_EMPTY;
       }
-    } while (error);
-    return result;
+    }
+    return gameObj;
+  }
+
+  function initAskContinueView(question) {
+    let answer = ``;
+    return {
+        ask() {
+            let error = ``;
+            do {
+                answer = console.readString(question);
+                error = !this.isYes() && !this.isNo();
+                if (error) console.writeln(`Please answer "yes" or "no".`)
+            } while (error);
+        },
+        isYes() {
+            return answer == 'si'
+        },
+        isNo() {
+            return answer == 'no'
+        }
+    }
   }
 
 }
