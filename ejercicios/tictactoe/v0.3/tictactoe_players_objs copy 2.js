@@ -24,7 +24,7 @@ function tictactoeView() {
           game.play();
         } while (!game.isFinish());
         
-       game.writeTokensView();
+        writeTokensView(gameObj);
       }
     }
 
@@ -35,11 +35,11 @@ function tictactoeView() {
     let isFinish = false;
     let gameObj = initGameObj();
 
-    askForPlayers();
     return{
       play(){
+        askForPlayers();
         modePlayers[gameObj.turn]();
-        gameObj.turn = nextTurn(gameObj);
+        setTurn();
       },
 
       writeTokensView() {
@@ -64,7 +64,7 @@ function tictactoeView() {
     }
 
     function machine(){
-      return placeTokens('machine');
+      return this.placeTokens('machine');
     };
     
     function human() {
@@ -104,18 +104,18 @@ function tictactoeView() {
     };
 
     function isTicTacToe() {
-      if ( getNumTokensEmpties() != 0 ) {
-        checkRow()
-        checkCol()
-        checkCrossLeft()
-        checkCrossRight()
+      if ( getNumTokensEmpties(gameObj) != 0 ) {
+        checkRow(gameObj)
+        checkCol(gameObj)
+        checkCrossLeft(gameObj)
+        checkCrossRight(gameObj)
       } else {
         console.writeln(`EMPATE`);
-        isFinish = true;
+        this.isFinish = true;
       }
 
 
-      function getNumTokensEmpties() {
+      function getNumTokensEmpties(gameObj) {
         let empties = 0;
         for (let i = 0; i < gameObj.tokens.length; i++) {
           for (let j = 0; j < gameObj.tokens[i].length; j++) {
@@ -127,18 +127,18 @@ function tictactoeView() {
         return empties;
       }
 
-      function checkCrossLeft() {
+      function checkCrossLeft(gameObj) {
         let testBox = ['0', '0', '0'];
         for (let i = 0; i < gameObj.tokens.length; i++) {
           testBox[i] = gameObj.tokens[i][i]
         }
         if (checkTestBox(testBox)) {
-          showTicTock( 'diagonal left to right')
+          showTicTock(gameObj, 'diagonal left to right')
         }
 
       }
 
-      function checkCrossRight() {
+      function checkCrossRight(gameObj) {
         let testBox = ['0', '0', '0'];
         let counter = gameObj.MAX_TOKENS - 1;
         for (let i = 0; i < gameObj.tokens.length; i++) {
@@ -146,31 +146,31 @@ function tictactoeView() {
           counter--;
         }
         if (checkTestBox(testBox)) {
-          showTicTock('diagonal right to left')
+          showTicTock(gameObj, 'diagonal right to left')
         }
       }
 
-      function checkRow() {
+      function checkRow(gameObj) {
         let testBox = ['0', '0', '0'];
         for (let i = 0; i < gameObj.tokens.length; i++) {
           for (let j = 0; j < gameObj.tokens[i].length; j++) {
             testBox[j] = gameObj.tokens[i][j]
           }
           if (checkTestBox(testBox)) {
-            showTicTock( 'horizontal')
+            showTicTock(gameObj, 'horizontal')
           }
         }
 
       }
 
-      function checkCol() {
+      function checkCol(gameObj) {
         let testBox = ['0', '0', '0'];
         for (let i = 0; i < gameObj.tokens[0].length; i++) {
           for (let j = 0; j < gameObj.tokens.length; j++) {
             testBox[j] = gameObj.tokens[j][i]
           }
           if (checkTestBox(testBox)) {
-            showTicTock( 'vertical')
+            showTicTock(gameObj, 'vertical')
           }
         }
 
@@ -192,7 +192,7 @@ function tictactoeView() {
         return full
       }
 
-      function showTicTock( msg) {
+      function showTicTock(gameObj, msg) {
         console.writeln(`-----------------------------------`)
         console.writeln(`línea ${msg}\nHA GANADO: ${getTurn(gameObj.turn)}`);
         console.writeln(`-----------------------------------`)
@@ -235,6 +235,11 @@ function tictactoeView() {
       let TURN_X = 'X';
       let TURN_Y = 'Y';
       return gameObj.turn === 0 ? TURN_X : TURN_Y
+    };
+
+    
+    function setTurn(){
+      return gameObj.turn === 0 ? 1 : 0;
     };
 
 

@@ -24,7 +24,7 @@ function tictactoeView() {
           game.play();
         } while (!game.isFinish());
         
-       game.writeTokensView();
+        writeTokensView(gameObj);
       }
     }
 
@@ -35,11 +35,11 @@ function tictactoeView() {
     let isFinish = false;
     let gameObj = initGameObj();
 
-    askForPlayers();
     return{
       play(){
+        askForPlayers();
         modePlayers[gameObj.turn]();
-        gameObj.turn = nextTurn(gameObj);
+        setTurn();
       },
 
       writeTokensView() {
@@ -64,7 +64,7 @@ function tictactoeView() {
     }
 
     function machine(){
-      return placeTokens('machine');
+      return this.placeTokens('machine');
     };
     
     function human() {
@@ -111,7 +111,7 @@ function tictactoeView() {
         checkCrossRight()
       } else {
         console.writeln(`EMPATE`);
-        isFinish = true;
+        this.isFinish = true;
       }
 
 
@@ -133,7 +133,7 @@ function tictactoeView() {
           testBox[i] = gameObj.tokens[i][i]
         }
         if (checkTestBox(testBox)) {
-          showTicTock( 'diagonal left to right')
+          showTicTock('diagonal left to right')
         }
 
       }
@@ -157,7 +157,7 @@ function tictactoeView() {
             testBox[j] = gameObj.tokens[i][j]
           }
           if (checkTestBox(testBox)) {
-            showTicTock( 'horizontal')
+            showTicTock('horizontal')
           }
         }
 
@@ -218,6 +218,7 @@ function tictactoeView() {
       } while (error);
       return position - 1;
     }
+    
     function  askForPlayers() {
       let error;
       let players;
@@ -235,6 +236,11 @@ function tictactoeView() {
       let TURN_X = 'X';
       let TURN_Y = 'Y';
       return gameObj.turn === 0 ? TURN_X : TURN_Y
+    };
+
+    
+    function setTurn(){
+      return gameObj.turn === 0 ? 1 : 0;
     };
 
 
