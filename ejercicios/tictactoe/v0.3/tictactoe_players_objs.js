@@ -218,7 +218,7 @@ function tictactoeView() {
       } while (error);
       return position - 1;
     }
-    function  askForPlayers() {
+    function askForPlayers() {
       let error;
       let players;
       do {
