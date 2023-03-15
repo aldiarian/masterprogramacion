@@ -5,8 +5,8 @@ tictactoeView().play();
 
 function tictactoeView() {
   const askContinueView = initAskContinueView(`¿Quieres jugar otra partida? si / no`);
-  return{
-    play(){
+  return {
+    play() {
       do {
         initPlayGameView().play();
         askContinueView.ask();
@@ -15,16 +15,16 @@ function tictactoeView() {
   }
 
 
-  function initPlayGameView(){
+  function initPlayGameView() {
     let game = initPlayGame();
-    return{
-      play(){
+    return {
+      play() {
         do {
           game.writeTokensView();
           game.play();
         } while (!game.isFinish());
-        
-       game.writeTokensView();
+
+        game.writeTokensView();
       }
     }
 
@@ -36,8 +36,8 @@ function tictactoeView() {
     let gameObj = initGameObj();
 
     askForPlayers();
-    return{
-      play(){
+    return {
+      play() {
         modePlayers[gameObj.turn]();
         gameObj.turn = nextTurn(gameObj);
       },
@@ -54,19 +54,19 @@ function tictactoeView() {
           msg += `${VERTICAL_SEPARATOR}\n`;
         }
         msg += `${HORIZONTAL_SEPARTOR}\n`;
-  
-        console.writeln(msg)
-      },  
 
-      isFinish(){
+        console.writeln(msg)
+      },
+
+      isFinish() {
         return isFinish == true;
       }
     }
 
-    function machine(){
+    function machine() {
       return placeTokens('machine');
     };
-    
+
     function human() {
       return placeTokens('human');
     };
@@ -77,16 +77,16 @@ function tictactoeView() {
       let targetRow;
       let targetCol;
       let error;
-      
+
       do {
-        if ( player == 'machine'){
-          targetRow = parseInt( Math.random()* gameObj.MAX_TOKENS ) ;
-          targetCol = parseInt( Math.random()* gameObj.MAX_TOKENS ) ;
-          error = !isEmpty( targetRow, targetCol)
+        if (player == 'machine') {
+          targetRow = parseInt(Math.random() * gameObj.MAX_TOKENS);
+          targetCol = parseInt(Math.random() * gameObj.MAX_TOKENS);
+          error = !isEmpty(targetRow, targetCol)
         } else {
           targetRow = readTarget(`Fila destino`);
           targetCol = readTarget(`Columna destino`);
-          error = !isEmpty( targetRow, targetCol)
+          error = !isEmpty(targetRow, targetCol)
           if (error) {
             console.writeln(`casilla ya ocupada`)
           }
@@ -104,7 +104,7 @@ function tictactoeView() {
     };
 
     function isTicTacToe() {
-      if ( getNumTokensEmpties() != 0 ) {
+      if (getNumTokensEmpties() != 0) {
         checkRow()
         checkCol()
         checkCrossLeft()
@@ -133,7 +133,7 @@ function tictactoeView() {
           testBox[i] = gameObj.tokens[i][i]
         }
         if (checkTestBox(testBox)) {
-          showTicTock( 'diagonal left to right')
+          showTicTock('diagonal left to right')
         }
 
       }
@@ -157,7 +157,7 @@ function tictactoeView() {
             testBox[j] = gameObj.tokens[i][j]
           }
           if (checkTestBox(testBox)) {
-            showTicTock( 'horizontal')
+            showTicTock('horizontal')
           }
         }
 
@@ -170,7 +170,7 @@ function tictactoeView() {
             testBox[j] = gameObj.tokens[j][i]
           }
           if (checkTestBox(testBox)) {
-            showTicTock( 'vertical')
+            showTicTock('vertical')
           }
         }
 
@@ -192,7 +192,7 @@ function tictactoeView() {
         return full
       }
 
-      function showTicTock( msg) {
+      function showTicTock(msg) {
         console.writeln(`-----------------------------------`)
         console.writeln(`línea ${msg}\nHA GANADO: ${getTurn(gameObj.turn)}`);
         console.writeln(`-----------------------------------`)
@@ -202,7 +202,7 @@ function tictactoeView() {
     };
 
 
-    function isEmpty( targetRow, targetCol) {
+    function isEmpty(targetRow, targetCol) {
       return gameObj.tokens[targetRow][targetCol] === gameObj.TOKEN_EMPTY;
     };
 
@@ -210,7 +210,7 @@ function tictactoeView() {
       let position;
       do {
         position = console.readNumber(`${title}:`);
-        error = position < 1 || position >gameObj. MAX_TOKENS; // opciones de error
+        error = position < 1 || position > gameObj.MAX_TOKENS; // opciones de error
         if (error) {
           console.writeln(`Por favor un numero entre 1 y ${gameObj.MAX_TOKENS} inclusives`)
         }
@@ -228,7 +228,7 @@ function tictactoeView() {
           console.writeln(`jugadores tienen que ser entre 0 y 2`)
         }
       } while (error);
-      modePlayers = [[ machine, machine ],[ human, machine ],[ human, human ]][players];
+      modePlayers = [[machine, machine], [human, machine], [human, human]][players];
     }
 
     function getTurn() {
@@ -244,12 +244,12 @@ function tictactoeView() {
 
 
 
-  function initGameObj(){
+  function initGameObj() {
     let gameObj = {
-      turn : 0,
-      MAX_TOKENS : 3,
-      TOKEN_EMPTY : ` `,
-      tokens:[]
+      turn: 0,
+      MAX_TOKENS: 3,
+      TOKEN_EMPTY: ` `,
+      tokens: []
     };
     for (let i = 0; i < gameObj.MAX_TOKENS; i++) {
       gameObj.tokens[i] = [];
@@ -263,20 +263,20 @@ function tictactoeView() {
   function initAskContinueView(question) {
     let answer = ``;
     return {
-        ask() {
-            let error = ``;
-            do {
-                answer = console.readString(question);
-                error = !this.isYes() && !this.isNo();
-                if (error) console.writeln(`Please answer "yes" or "no".`)
-            } while (error);
-        },
-        isYes() {
-            return answer == 'si'
-        },
-        isNo() {
-            return answer == 'no'
-        }
+      ask() {
+        let error = ``;
+        do {
+          answer = console.readString(question);
+          error = !this.isYes() && !this.isNo();
+          if (error) console.writeln(`Please answer "yes" or "no".`)
+        } while (error);
+      },
+      isYes() {
+        return answer == 'si'
+      },
+      isNo() {
+        return answer == 'no'
+      }
     }
   }
 
