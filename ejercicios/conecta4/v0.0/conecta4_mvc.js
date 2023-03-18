@@ -27,6 +27,7 @@ function initGameView() {
                 game.showBoard();
                 game.placeToken();
             } while (!game.isFinish());
+            game.showBoard();
         }
     }
 }
@@ -87,23 +88,37 @@ function initGame() {
 
             
         },
-        checkHorizontal() {
-            let textBox = []
-            let turn = this.getTurn();
-            let template = [turn, turn, turn, turn];
-            console.writeln( `en row:${coordinates.row} col:${coordinates.col} `)
-            console.writeln( `hay ${board[coordinates.row][coordinates.col]}`)
-            // // left
-            // for (let i = coordinates.col; i < template.length; i++) {
-            //     const element = array[i];
-                
-            // }
 
-        },
 
         checkIsWinner(){
-            console.writeln(`comprobar si hay cuatro en raya`)
-            this.checkHorizontal();
+            if ( this.checkHorizontalLeft() || this.checkHorizontalRight()) {
+                console.writeln(`Gana ${this.getTurn()} en horizontal`)
+                this.setFinish(true);
+            };
+        },
+
+        checkHorizontalLeft() {
+            let test = this.initCheck();
+            for (let i = 0 ; i < test.template.length; i++) {
+                test.box[i] = board[coordinates.row][coordinates.col + i];
+            }
+            return test.box.toString() == test.template.toString(test.template);
+        },
+        checkHorizontalRight() {
+            let test = this.initCheck();
+            for (let i = 0 ; i < test.template.length; i++) {
+                test.box[i] = board[coordinates.row][coordinates.col - i];
+            }
+            return test.box.toString() == test.template.toString(test.template);
+        },
+
+        initCheck(){
+            let activeTurn = this.getTurn();
+            return{
+                box: [],
+                activeTrn:activeTurn,
+                template:[activeTurn, activeTurn, activeTurn, activeTurn]
+            }
         },
 
         readTarget(title) {
