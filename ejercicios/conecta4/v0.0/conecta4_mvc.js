@@ -24,11 +24,29 @@ function initGameView() {
             game.createBoard();
             do {
                 game.nextTurn();
-                game.showBoard();
+                this.showBoard();
                 game.placeToken();
             } while (!game.isFinish());
-            game.showBoard();
-        }
+            this.showBoard();
+            this.showWinner()
+        },
+        showWinner(){
+            console.writeln(`Gana ${game.getTurn()} en ${game.getFinish().position}`)
+        },
+        showBoard() {
+            const HORIZONTAL_SEPARTOR = `-----------------------------`;
+            const VERTICAL_SEPARATOR = `|`;
+            let msg = ``;
+            for (let i = 0; i < game.getBoard().length; i++) {
+                msg += `${HORIZONTAL_SEPARTOR}\n`;
+                for (let j = 0; j < game.getBoard()[i].length; j++) {
+                    msg += `${VERTICAL_SEPARATOR} ${game.getBoard()[i][j]} `;
+                }
+                msg += `${VERTICAL_SEPARATOR}\n`;
+            }
+            msg += `${HORIZONTAL_SEPARTOR}\n`;
+            console.writeln(msg)
+        },
     }
 }
 
@@ -41,25 +59,38 @@ function initGame() {
     const COLUMNS = 7;
     const TOKEN_EMPTY = ` `;
     let turn = 0;
-    let finish = false;
+    let finish = {
+        value : false,
+        position: ''
+    };
     let coordinates = initCoordinates()
     return {
         play() {
         },
+
         isFinish() {
-            return finish == true;
+            return finish.value == true;
         },
-        setFinish(value) {
-            finish = value;
+        
+        getFinish(){
+            return finish;
         },
+        
+        setFinish(value, position) {
+            finish.value = value;
+            finish.position = position ;
+        },
+        
         getTurn() {
             let TURN_X = 'X';
             let TURN_Y = '0';
             return turn === 0 ? TURN_X : TURN_Y
         },
+        
         nextTurn() {
             turn === 0 ? turn = 1 : turn = 0;
         },
+        
         placeToken() {
             let targetCol;
             let targetSet = false;
@@ -81,35 +112,86 @@ function initGame() {
                     }
                 }
             } while (error);
-
-          
             this.checkIsWinner();
-            
-
-            
         },
 
+        checkIsWinner() {
+            if (this.checkHorizontal()) {
+                this.setFinish(true, 'horizontal');
+            }
+            if (this.checkVertical()) {
+                this.setFinish(true, 'vertical');
+            }
+            if (this.checkCross()) {
+                this.setFinish(true, 'diagonal');
+            }
+        },
 
-        checkIsWinner(){
-            if ( this.checkHorizontalLeft() || this.checkHorizontalRight()) {
-                console.writeln(`Gana ${this.getTurn()} en horizontal`)
-                this.setFinish(true);
-            };
+        checkCross() {
+            console.writeln(`row ${coordinates.row} col ${coordinates.col}`);
+            let test = this.initCheck();
+
+            if (coordinates.row > 2 && coordinates.col > 3) {
+                // console.writeln(`RightTop`)
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row - i][coordinates.col - i];
+                }
+                return test.box.toString() == test.template.toString();
+            }
+
+            if (coordinates.row > 2 && coordinates.col < 4) {
+                // console.writeln(`LeftTop`)
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row - i][coordinates.col + i];
+                }
+                return test.box.toString() == test.template.toString();
+            }
+            if (coordinates.row < 3 && coordinates.col < 4) {
+                // console.writeln(`LeftBottom`)
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row + i][coordinates.col + i];
+                }
+                console.writeln(`testbox:${test.box}`)
+                return test.box.toString() == test.template.toString();
+            }
+            if (coordinates.row < 3 && coordinates.col > 2) {
+                // console.writeln(`RightBottom`)
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row + i][coordinates.col - i];
+                }
+                return test.box.toString() == test.template.toString();
+            }
+
+        },
+
+        checkHorizontal() {
+            return (this.checkHorizontalLeft() || this.checkHorizontalRight());
         },
 
         checkHorizontalLeft() {
             let test = this.initCheck();
-            for (let i = 0 ; i < test.template.length; i++) {
+            for (let i = 0; i < test.template.length; i++) {
                 test.box[i] = board[coordinates.row][coordinates.col + i];
             }
-            return test.box.toString() == test.template.toString(test.template);
+            return test.box.toString() == test.template.toString();
         },
+
         checkHorizontalRight() {
             let test = this.initCheck();
-            for (let i = 0 ; i < test.template.length; i++) {
+            for (let i = 0; i < test.template.length; i++) {
                 test.box[i] = board[coordinates.row][coordinates.col - i];
             }
-            return test.box.toString() == test.template.toString(test.template);
+            return test.box.toString() == test.template.toString();
+        },
+
+        checkVertical() {
+            let test = this.initCheck();
+            if (coordinates.row <= 2) {
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row + i][coordinates.col];
+                }
+            }
+            return test.box.toString() == test.template.toString();
         },
 
         initCheck(){
@@ -141,11 +223,20 @@ function initGame() {
                     board[i][j] = TOKEN_EMPTY;
                 }
             }
+            // return board = [
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY, "X", "X", "X", TOKEN_EMPTY, TOKEN_EMPTY],
+            // ]
         },
 
         getBoard() {
             return board;
         },
+
         setBoard(newBoard) {
             board = newBoard;
         },
@@ -171,33 +262,6 @@ function initGame() {
 
 function initCoordinates(){
     return { col: 0, row: 0 }
-}
-
-//goal
-function isWinner() {
-
-}
-
-function isDiagonal() {
-
-}
-function isVertical() {
-
-}
-function isHorizontal() {
-
-}
-
-
-function player() {
-
-}
-
-function turn() {
-
-}
-function turnView() {
-
 }
 
 function initAskQuestionYesNoView(question) {
