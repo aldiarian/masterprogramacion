@@ -1,0 +1,49 @@
+class Conect4
+class Player
+class Turn
+class Board
+class Token
+note left
+ 21 x red
+ 21 x yellow.
+end note
+class Box
+class Goal
+note right
+ 4 consecutive tokens
+ inserted of the same color. 
+end note
+class Coordinate
+
+class PlaceToken
+class Diagonal
+class Horizontal
+class Vertical
+
+Enum Color
+{
+ Red
+ Yellow
+}
+
+
+Conect4 *-->"2" Player
+Conect4 *--> Board
+Conect4 *--> Turn
+
+Player *--> Goal
+Player *--> Turn
+Player ---> Board
+Player -->"21" Token
+
+Board *-->"6x7" Box
+Box *--> Coordinate
+
+Goal --> PlaceToken
+Goal <|-- Diagonal 
+Goal <|-- Horizontal
+Goal <|-- Vertical
+
+PlaceToken --> Box
+PlaceToken --> Token
+Token *--> Color

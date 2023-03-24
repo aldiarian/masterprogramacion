@@ -8,7 +8,7 @@ function initConectaView() {
     return {
         start() {
             do {
-                initGameView().play()
+                initBoardView().play()
                 askContinueView.ask();
             } while (askContinueView.isYes());
         }
@@ -17,30 +17,30 @@ function initConectaView() {
 }
 
 
-function initGameView() {
-    let game = initGame();
+function initBoardView() {
+    let board = initBoard();
     return {
         play() {
-            game.createBoard();
+            board.createBoard();
             do {
-                game.nextTurn();
+                board.nextTurn();
                 this.showBoard();
-                game.placeToken();
-            } while (!game.isFinish());
+                board.placeToken();
+            } while (!board.isFinish());
             this.showBoard();
             this.showWinner()
         },
         showWinner(){
-            console.writeln(`Gana ${game.getTurn()} en ${game.getFinish().position}`)
+            console.writeln(`Gana ${board.getTurn()} en ${board.getFinish().position}`)
         },
         showBoard() {
             const HORIZONTAL_SEPARTOR = `-----------------------------`;
             const VERTICAL_SEPARATOR = `|`;
             let msg = ``;
-            for (let i = 0; i < game.getBoard().length; i++) {
+            for (let i = 0; i < board.getBoard().length; i++) {
                 msg += `${HORIZONTAL_SEPARTOR}\n`;
-                for (let j = 0; j < game.getBoard()[i].length; j++) {
-                    msg += `${VERTICAL_SEPARATOR} ${game.getBoard()[i][j]} `;
+                for (let j = 0; j < board.getBoard()[i].length; j++) {
+                    msg += `${VERTICAL_SEPARATOR} ${board.getBoard()[i][j]} `;
                 }
                 msg += `${VERTICAL_SEPARATOR}\n`;
             }
@@ -53,7 +53,7 @@ function initGameView() {
 
 
 
-function initGame() {
+function initBoard() {
     let board = [];
     const ROWS = 6;
     const COLUMNS = 7;
@@ -65,28 +65,26 @@ function initGame() {
     };
     let coordinates = initCoordinates()
     return {
-        play() {
-        },
-
+        
         isFinish() {
             return finish.value == true;
         },
-        
+
         getFinish(){
             return finish;
         },
-        
+
         setFinish(value, position) {
             finish.value = value;
             finish.position = position ;
         },
-        
+
         getTurn() {
             let TURN_X = 'X';
             let TURN_Y = '0';
             return turn === 0 ? TURN_X : TURN_Y
         },
-        
+
         nextTurn() {
             turn === 0 ? turn = 1 : turn = 0;
         },
@@ -112,10 +110,10 @@ function initGame() {
                     }
                 }
             } while (error);
-            this.checkIsWinner();
+            this.isWinner();
         },
 
-        checkIsWinner() {
+        isWinner() {
             if (this.checkHorizontal()) {
                 this.setFinish(true, 'horizontal');
             }
@@ -128,64 +126,62 @@ function initGame() {
         },
 
         checkCross() {
-            console.writeln(`row ${coordinates.row} col ${coordinates.col}`);
-            let test = this.initCheck();
+            let test = this.initTest();
+            let isRightTop, isLeftTop, isLeftBottom, isRightBottom = false;
 
             if (coordinates.row > 2 && coordinates.col > 3) {
                 // console.writeln(`RightTop`)
                 for (let i = 0; i < test.template.length; i++) {
                     test.box[i] = board[coordinates.row - i][coordinates.col - i];
                 }
-                return test.box.toString() == test.template.toString();
+                isRightTop = test.box.toString() == test.template.toString();
             }
-
             if (coordinates.row > 2 && coordinates.col < 4) {
                 // console.writeln(`LeftTop`)
                 for (let i = 0; i < test.template.length; i++) {
                     test.box[i] = board[coordinates.row - i][coordinates.col + i];
                 }
-                return test.box.toString() == test.template.toString();
+                isLeftTop =  test.box.toString() == test.template.toString();
             }
             if (coordinates.row < 3 && coordinates.col < 4) {
                 // console.writeln(`LeftBottom`)
                 for (let i = 0; i < test.template.length; i++) {
                     test.box[i] = board[coordinates.row + i][coordinates.col + i];
                 }
-                console.writeln(`testbox:${test.box}`)
-                return test.box.toString() == test.template.toString();
+                // console.writeln(`testbox:${test.box}`)
+                isLeftBottom =  test.box.toString() == test.template.toString();
             }
             if (coordinates.row < 3 && coordinates.col > 2) {
                 // console.writeln(`RightBottom`)
                 for (let i = 0; i < test.template.length; i++) {
                     test.box[i] = board[coordinates.row + i][coordinates.col - i];
                 }
-                return test.box.toString() == test.template.toString();
+                isRightBottom = test.box.toString() == test.template.toString();
             }
+
+            return isRightTop || isLeftTop || isLeftBottom || isRightBottom
 
         },
 
         checkHorizontal() {
-            return (this.checkHorizontalLeft() || this.checkHorizontalRight());
-        },
+                let test = this.initTest();
+            
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row][ coordinates.col - i];
+                }
+                let isLineRight = test.box.toString() == test.template.toString();
 
-        checkHorizontalLeft() {
-            let test = this.initCheck();
-            for (let i = 0; i < test.template.length; i++) {
-                test.box[i] = board[coordinates.row][coordinates.col + i];
-            }
-            return test.box.toString() == test.template.toString();
-        },
-
-        checkHorizontalRight() {
-            let test = this.initCheck();
-            for (let i = 0; i < test.template.length; i++) {
-                test.box[i] = board[coordinates.row][coordinates.col - i];
-            }
-            return test.box.toString() == test.template.toString();
+                for (let i = 0; i < test.template.length; i++) {
+                    test.box[i] = board[coordinates.row][coordinates.col + i];
+                }
+                let isLineLeft = test.box.toString() == test.template.toString();
+                
+                return isLineRight || isLineLeft; 
+                
         },
 
         checkVertical() {
-            let test = this.initCheck();
+            let test = this.initTest();
             if (coordinates.row <= 2) {
                 for (let i = 0; i < test.template.length; i++) {
                     test.box[i] = board[coordinates.row + i][coordinates.col];
@@ -194,12 +190,13 @@ function initGame() {
             return test.box.toString() == test.template.toString();
         },
 
-        initCheck(){
+        initTest(position){
             let activeTurn = this.getTurn();
             return{
                 box: [],
                 activeTrn:activeTurn,
-                template:[activeTurn, activeTurn, activeTurn, activeTurn]
+                template:[activeTurn, activeTurn, activeTurn, activeTurn],
+                position:position
             }
         },
 
@@ -227,18 +224,14 @@ function initGame() {
             //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
             //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
             //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY, "X", "X", "X", TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "0", TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "X", "0", TOKEN_EMPTY, TOKEN_EMPTY],
+            //     [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "X", "X", TOKEN_EMPTY, TOKEN_EMPTY]
             // ]
         },
 
         getBoard() {
             return board;
-        },
-
-        setBoard(newBoard) {
-            board = newBoard;
         },
 
         showBoard() {
