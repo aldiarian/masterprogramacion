@@ -29,14 +29,19 @@ class Game {
         this.#turn = new Turn();
     
     }
+    getColor(coord){
+        return this.#board.getColor(coord);
+    }
 };
 
 class GameView {
 
     #game;
+    #boardView;
 
     constructor(game){
         this.#game = game;
+        this.#boardView = new BoardView(this.#game) ;
     }
     play(){
         do {
@@ -44,7 +49,16 @@ class GameView {
         } while (this.#isResumed());
     }
     #playGame(){
-        console.writeln('he jugao');
+        let isfinish = true;
+        console.writeln(Message.TITLE.writeln());
+        do {
+            //mostrar tablero
+            this.#boardView.write()
+            //mostrar el turno
+            //pedir ficha 
+        } while (!isfinish);
+        // si hay ganador o empate enseñar mensaje
+      
     }
     #isResumed(){
         let yesNoDialog= new YesNoDialog();
@@ -53,6 +67,54 @@ class GameView {
     }
 
 };
+class ClosedInterval {
+    #min;
+    #max;
+
+    constructor(min, max) {
+        this.#min = min;
+        this.#max = max;
+    }
+
+    isIncluded(value) {
+        return this.#min <= value && value <= this.#max;
+    }
+
+}
+class Coordinate {
+    static NUM_ROWS = 6;
+    static NUM_COLS = 7;
+    static #ROWS = new ClosedInterval(0, Coordinate.NUM_ROWS - 1);
+    static #COLS = new ClosedInterval(0, Coordinate.NUM_COLS - 1);
+
+    #row;
+    #column;
+    
+    constructor(row, column) {
+        this.#row = row;
+        this.#column = column;
+    };
+
+    isValid(){
+        return Coordinate.#isColValid(this.getColumn()) && Coordinate.#isRowValid(this.getRow())
+    }
+    
+    static #isColValid(col){
+        return Coordinate.#COLS.isIncluded(col)
+    }
+    static #isRowValid(row){
+        return Coordinate.#ROWS.isIncluded(row)
+    }
+    getRow(){
+        return this.#row
+    }
+    getColumn() {
+        return this.#column;
+    }
+
+}
+
+
 
 class Turn {
 
@@ -79,13 +141,56 @@ class TurnView {
 }
 
 class Board{
+    
+    #boardPanel;
+
     constructor(){
+        this.#boardPanel = [];
+        this.initBoard();
+    }
+    initBoard(){
+        for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
+            this.#boardPanel[i] = [];
+            for (let j = 0; j < Coordinate.NUM_COLS; j++) {
+                this.#boardPanel[i][j] = Color.NULL;
+            }
+        }
+        console.writeln('board' + this.#boardPanel)
+    }
+    getColor(coord){
+        return  this.#boardPanel[coord.getRow()][coord.getColumn];
     }
 
 }
 class BoardView{
-    constructor(){
+    #game;
+    constructor(game){
+        this.#game = game
     }
+    write(){
+        const HORIZONTAL_SEPARTOR = `-----------------------------`;
+        const VERTICAL_SEPARATOR = `|`;
+        let msg = ``;
+        for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
+            msg += `${HORIZONTAL_SEPARTOR}\n`;
+            for (let j = 0; j < Coordinate.NUM_COLS; j++) {
+                msg += `${VERTICAL_SEPARATOR} ${this.#game.getColor(new Coordinate(i,j))}`;
+            }
+            msg += `${VERTICAL_SEPARATOR}\n`;
+        }
+        msg += `${HORIZONTAL_SEPARTOR}\n`;
+        console.writeln(msg)
+    }
+}
+
+class Color {
+    static RED = "R";
+    static YELLOW = "Y";
+    static NULL = ` `;
+    constructor(){
+
+    }
+
 }
 
 
