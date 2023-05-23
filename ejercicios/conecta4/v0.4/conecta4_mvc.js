@@ -32,16 +32,27 @@ class Game {
     getColor(coord){
         return this.#board.getColor(coord);
     }
+    getColorActive(){
+        return this.#turn.getColorActive();
+    }
+    isComplete(col){
+        return this.#board.isComplete(col);
+    }
+    dropToken(col){
+        this.#board.dropToken(col, this.#turn.getColorActive())
+    }
 };
 
 class GameView {
 
     #game;
     #boardView;
+    #turnView;
 
     constructor(game){
         this.#game = game;
         this.#boardView = new BoardView(this.#game) ;
+        this.#turnView = new TurnView(this.#game);
     }
     play(){
         do {
@@ -50,12 +61,11 @@ class GameView {
     }
     #playGame(){
         let isfinish = true;
-        console.writeln(Message.TITLE.writeln());
+        Message.TITLE.writeln();
+        this.#boardView.write()
         do {
-            //mostrar tablero
+            this.#turnView.play();
             this.#boardView.write()
-            //mostrar el turno
-            //pedir ficha 
         } while (!isfinish);
         // si hay ganador o empate enseñar mensaje
       
@@ -81,6 +91,7 @@ class ClosedInterval {
     }
 
 }
+
 class Coordinate {
     static NUM_ROWS = 6;
     static NUM_COLS = 7;
@@ -95,11 +106,16 @@ class Coordinate {
         this.#column = column;
     };
 
+    shifted(coordinate) {
+        return new Coordinate(this.#row + coordinate.#row,
+            this.#column + coordinate.#column);
+    }
+
     isValid(){
-        return Coordinate.#isColValid(this.getColumn()) && Coordinate.#isRowValid(this.getRow())
+        return Coordinate.isColValid(this.getColumn()) && Coordinate.#isRowValid(this.getRow())
     }
     
-    static #isColValid(col){
+    static isColValid(col){
         return Coordinate.#COLS.isIncluded(col)
     }
     static #isRowValid(row){
@@ -113,6 +129,25 @@ class Coordinate {
     }
 
 }
+class Direction{
+    static NORTH = new Direction(1,0);
+    static SOUTH = new Direction(-1,0);
+    static EAST  = new Direction(0, 1);
+    static WEST = new Direction(0, -1);
+
+    #coordinate
+
+    constructor(row, column){
+        this.#coordinate = new Coordinate(row, column)
+    }
+    
+    getCoordinate(){ 
+        return this.#coordinate
+    }
+
+
+}
+
 
 
 
@@ -130,35 +165,84 @@ class Turn {
     next(){
         this.#turnActive === 0 ? this.#turnActive = 1 : this.#turnActive = 0;
     }
-    getTurnActive(){
-        return this.#turnActive
+    getColorActive(){
+        return  Color.values()[this.#turnActive];
     }
 
 }
 class TurnView {
-    constructor(){
+    #game
+    constructor(game){
+        this.#game = game;
+    }
+
+    play(){
+        let valid;
+        let column;
+        do {
+            console.writeln(`${Message.TURN.getString()}${this.#game.getColorActive()}`)
+            column = console.readString(Message.ENTER_COLUMN.write()) -1;
+            valid = Coordinate.isColValid(column);
+            if (!valid){
+                Message.INVALID_COLUMN.writeln();
+            } else {
+                valid = !this.#game.isComplete(column);
+                if (!valid){
+                    Message.COMPLETED_COLUMN.writeln();
+                }
+            }
+        } while (!valid);
+        this.#game.dropToken(column);
     }
 }
 
 class Board{
     
-    #boardPanel;
+    #colors;
+    #lastDrop;
 
-    constructor(){
-        this.#boardPanel = [];
-        this.initBoard();
-    }
-    initBoard(){
+    constructor() {
+        this.#colors = [];
         for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
-            this.#boardPanel[i] = [];
+            this.#colors[i] = [];
+        }
+        this.reset();
+    }
+
+    reset() {
+        for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
             for (let j = 0; j < Coordinate.NUM_COLS; j++) {
-                this.#boardPanel[i][j] = Color.NULL;
+                this.#colors[i][j] = Color.NULL;
             }
         }
-        console.writeln('board' + this.#boardPanel)
+        // ------[fila][columna] --------------
+        // for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
+        //     this.#colors[i][0] = Color.RED.toString()[0];
+        // }
+        this.#colors[0][0] = Color.RED.toString()[0];
     }
-    getColor(coord){
-        return  this.#boardPanel[coord.getRow()][coord.getColumn];
+    getColor(coordinate) {
+        return this.#colors[coordinate.getRow()][coordinate.getColumn()];
+    }
+    isComplete(col){
+        if (this.isEmpty( new Coordinate( Coordinate.NUM_ROWS - 1, col) )){
+            return false
+        }
+        return true
+    }
+    isOccupied(coordinate, color) {
+        return this.getColor(coordinate) == color;
+    }
+    isEmpty(coordinate) {
+        return this.isOccupied(coordinate, Color.NULL);
+    }
+    dropToken(col, color){
+        this.#lastDrop = new Coordinate(0, col)
+        console.writeln( `ficha puesta en la fila ${this.#lastDrop.getRow() +1} col ${this.#lastDrop.getColumn() +1} `)
+        while (!this.isEmpty(this.#lastDrop)) {
+            this.#lastDrop = this.#lastDrop.shifted(Direction.NORTH.getCoordinate())
+        }
+        this.#colors[this.#lastDrop.getRow()][this.#lastDrop.getColumn()] = color.toString()[0];
     }
 
 }
@@ -168,27 +252,45 @@ class BoardView{
         this.#game = game
     }
     write(){
-        const HORIZONTAL_SEPARTOR = `-----------------------------`;
-        const VERTICAL_SEPARATOR = `|`;
-        let msg = ``;
-        for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
-            msg += `${HORIZONTAL_SEPARTOR}\n`;
+        this.#writeHorizontal();
+        for (let i = Coordinate.NUM_ROWS -1; i >=0 ; i--) {
+            Message.VERTICAL_SEPARATOR.write();
             for (let j = 0; j < Coordinate.NUM_COLS; j++) {
-                msg += `${VERTICAL_SEPARATOR} ${this.#game.getColor(new Coordinate(i,j))}`;
+                console.write(` ${this.#game.getColor(new Coordinate(i,j)) } `);
+                Message.VERTICAL_SEPARATOR.write();
             }
-            msg += `${VERTICAL_SEPARATOR}\n`;
+            console.writeln();
         }
-        msg += `${HORIZONTAL_SEPARTOR}\n`;
-        console.writeln(msg)
+        this.#writeHorizontal();
+    }
+    #writeHorizontal(){
+        for (let i = 0; i < 4 * Coordinate.NUM_COLS; i++) {
+            Message.HORIZONTAL_SEPARTOR.write();
+        }
+        Message.HORIZONTAL_SEPARTOR.writeln();
     }
 }
 
 class Color {
-    static RED = "R";
-    static YELLOW = "Y";
-    static NULL = ` `;
-    constructor(){
+    static RED = new Color("RED");
+    static YELLOW = new Color("YELLOW");
+    static NULL = new Color(` `);
+    #stirng;
+    
+    constructor(string){
+        this.#stirng = string;
+    }
+    
+    static values(){
+        return [Color.RED, Color.YELLOW];
+    }
 
+    static get(num){
+        return Color.values()[num];
+    }
+
+    toString(){
+        return this.#stirng;
     }
 
 }
@@ -226,6 +328,12 @@ class YesNoDialog {
 class Message{
     static TITLE = new Message(`--- CONNECT 4 ---`);
     static RESUME = new Message(`Do you want to continue`);
+    static ENTER_COLUMN = new Message(`Enter a column to drop a token: `);
+    static INVALID_COLUMN = new Message(`Invalid columnn!!! Values [1-7]`);
+    static COMPLETED_COLUMN = new Message(`Invalid column!!! It's completed`);
+    static TURN = new Message(`Turn: `);
+    static HORIZONTAL_SEPARTOR =  new Message(`-`);
+    static VERTICAL_SEPARATOR =  new Message(`|`);
     
     #string;
 

@@ -166,7 +166,7 @@ class Color {
 
 class Board {
 
-    #colors;
+    #colors; // mi boardPanel
     #lastDrop;
 
     constructor() {
