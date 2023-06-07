@@ -38,8 +38,17 @@ class Game {
     isComplete(col){
         return this.#board.isComplete(col);
     }
+    isFinished(){
+        return this.#board.isFinished();
+    }
+    isWinner() {
+        return this.#board.isWinner();
+    }
     dropToken(col){
-        this.#board.dropToken(col, this.#turn.getColorActive())
+        this.#board.dropToken(col, this.#turn.getColorActive());
+        if (!this.#board.isFinished()) {
+            this.#turn.next();
+        }
     }
 };
 
@@ -60,14 +69,13 @@ class GameView {
         } while (this.#isResumed());
     }
     #playGame(){
-        let isfinish = true;
         Message.TITLE.writeln();
         this.#boardView.write()
         do {
             this.#turnView.play();
             this.#boardView.write()
-        } while (!isfinish);
-        // si hay ganador o empate enseñar mensaje
+        } while (!this.#game.isFinished());
+        this.#turnView.writeResult();
       
     }
     #isResumed(){
@@ -127,13 +135,50 @@ class Coordinate {
     getColumn() {
         return this.#column;
     }
+    toString(){
+        return `Coordinate [row=${this.#row} column=${this.#column}]`;
+    }
+
+};
+
+class Line {
+    
+    static LENGHT = 4;
+    #origin;
+    #coordinates;
+    #oppositeDirection;
+
+    constructor(coordinate){
+        this.#origin = coordinate;
+    }
+
+    set(direction){
+        this.#coordinates = [this.#origin];
+        for (let i = 1; i < Line.LENGHT; i++) {
+            this.#coordinates[i] = this.#coordinates[i -1].shifted(Direction.getCoordinate());
+        }
+        this.#oppositeDirection = direction.getOpposite() ;
+    }
+    shift(){
+        for (let i = 0; i < Line.LENGHT; i++) {
+            this.#coordinates[i] = this.coordinate[i].shifted(this.#oppositeDirection.getCoordinate())
+        }
+    }
+    
+    getCoordinates(){
+        return this.#coordinates;
+    }
 
 }
 class Direction{
-    static NORTH = new Direction(1,0);
-    static SOUTH = new Direction(-1,0);
-    static EAST  = new Direction(0, 1);
+    static NORTH = new Direction(1, 0);
+    static NORTH_EAST = new Direction(1, 1);
+    static EAST = new Direction(0, 1);
+    static SOUTH_EAST = new Direction(-1, 1);
+    static SOUTH = new Direction(-1, 0);
+    static SOUTH_WEST = new Direction(-1, -1);
     static WEST = new Direction(0, -1);
+    static NORTH_WEST = new Direction(1, -1);
 
     #coordinate
 
@@ -144,7 +189,20 @@ class Direction{
     getCoordinate(){ 
         return this.#coordinate
     }
+    
+    static values() {
+        return [Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
+        Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST];
+    }
 
+    getOpposite() {
+        for (let direction of Direction.values()) {
+            if (direction.#coordinate.shifted(this.#coordinate).equals(Coordinate.ORIGIN)) {
+                return direction;
+            }
+        }
+        return null;
+    }
 
 }
 
@@ -194,6 +252,15 @@ class TurnView {
         } while (!valid);
         this.#game.dropToken(column);
     }
+    writeResult() {
+        if (this.#game.isWinner()){
+            let message = Message.WINNER.getString();
+            message = message.replace(`#color`, this.#game.getColorActive().toString())
+            console.writeln( message )
+        }else{
+            console.writeln(Message.TIED.write())
+        }
+    }
 }
 
 class Board{
@@ -217,9 +284,12 @@ class Board{
         }
         // ------[fila][columna] --------------
         // for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
-        //     this.#colors[i][0] = Color.RED.toString()[0];
+        //     for (let j = 0; j < Coordinate.NUM_COLS; j++) {
+        //         this.#colors[i][j] = Color.RED.toString()[0];
+        //     }
         // }
-        this.#colors[0][0] = Color.RED.toString()[0];
+        // this.#colors[5][5] = Color.NULL;
+        // this.#colors[5][6] = Color.NULL;
     }
     getColor(coordinate) {
         return this.#colors[coordinate.getRow()][coordinate.getColumn()];
@@ -230,11 +300,34 @@ class Board{
         }
         return true
     }
+    isCompleteBoard(){
+        let iscomp ;
+        for (let i = 0; iscomp && i < Coordinate.NUM_COLS; i++) {
+            iscomp = this.isComplete(i) ?  true : false;
+        }
+        return iscomp;
+    }
     isOccupied(coordinate, color) {
         return this.getColor(coordinate) == color;
     }
     isEmpty(coordinate) {
         return this.isOccupied(coordinate, Color.NULL);
+    }
+    isFinished(){
+        return this.isCompleteBoard() || this.isWinner();
+    }
+    isWinner(){
+        let line = new Line(this.#lastDrop);
+        for (let direction of Direction.values().splice(0,3)) {
+            line.set(direction);
+            for (let i = 0; i < Line.LENGHT; i++) {
+               if(this.isConnetc4(line)){
+                    return true
+               }
+               line.shift();
+            }
+            
+        }
     }
     dropToken(col, color){
         this.#lastDrop = new Coordinate(0, col)
@@ -334,6 +427,8 @@ class Message{
     static TURN = new Message(`Turn: `);
     static HORIZONTAL_SEPARTOR =  new Message(`-`);
     static VERTICAL_SEPARATOR =  new Message(`|`);
+    static TIED = new Message(`TIED!!!`);
+    static WINNER = new Message(`#color a ganao`)
     
     #string;
 
