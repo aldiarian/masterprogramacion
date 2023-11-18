@@ -214,20 +214,20 @@ function initBoard() {
         },
 
         createBoard() {
-            for (let i = 0; i < ROWS; i++) {
-                board[i] = [];
-                for (let j = 0; j < COLUMNS; j++) {
-                    board[i][j] = TOKEN_EMPTY;
-                }
-            }
-            // return board = [
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "0", TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "X", "0", TOKEN_EMPTY, TOKEN_EMPTY],
-            //     [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "X", "X", TOKEN_EMPTY, TOKEN_EMPTY]
-            // ]
+            // for (let i = 0; i < ROWS; i++) {
+            //     board[i] = [];
+            //     for (let j = 0; j < COLUMNS; j++) {
+            //         board[i][j] = TOKEN_EMPTY;
+            //     }
+            // }
+            return board = [
+                [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+                [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+                [ TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+                [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "0", TOKEN_EMPTY, TOKEN_EMPTY, TOKEN_EMPTY],
+                [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "X", "0", TOKEN_EMPTY, TOKEN_EMPTY],
+                [ TOKEN_EMPTY, TOKEN_EMPTY,  "X", "X", "X", TOKEN_EMPTY, TOKEN_EMPTY]
+            ]
         },
 
         getBoard() {

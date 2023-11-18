@@ -19,12 +19,11 @@ function mastermind(){
 
         
         let secretCombination = createSecretCombination(COLORS, COMBINATION_LENGTH);
-        // let secretCombination = 'bycr';
         console.writeln(`secret: ${secretCombination}\n`)
         console.writeln(`----- MASTERMIND -----\n`)
 
         do {
-            console.writeln(`${attempts} attempt(s):`);
+            console.writeln(`${MAX_ATTEMPS - attempts } attempt(s) left:`);
             console.writeln(`****`);
             if ( attempts > 0) {
                 console.writeln(`${storageAttempts}`)
@@ -44,7 +43,6 @@ function mastermind(){
         if(winner) { 
             console.writeln(`You've won!!! ;-)`) }
         else {
-            console.writeln(`${attempts} attempt(s):`);
             console.writeln(`${storageAttempts}`)
             console.writeln(`You've lost!!! :-(`)
         }

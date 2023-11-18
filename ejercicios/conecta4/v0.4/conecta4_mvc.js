@@ -2,8 +2,6 @@ const { Console } = require("../../console");
 const console = new Console();
 
 
-
-
 class Conect4 {
     #game;
     #gameView;
@@ -29,21 +27,27 @@ class Game {
         this.#turn = new Turn();
     
     }
+
     getColor(coord){
         return this.#board.getColor(coord);
     }
+
     getColorActive(){
         return this.#turn.getColorActive();
     }
+
     isComplete(col){
         return this.#board.isComplete(col);
     }
+
     isFinished(){
         return this.#board.isFinished();
     }
+
     isWinner() {
         return this.#board.isWinner();
     }
+
     dropToken(col){
         this.#board.dropToken(col, this.#turn.getColorActive());
         if (!this.#board.isFinished()) {
@@ -135,6 +139,13 @@ class Coordinate {
     getColumn() {
         return this.#column;
     }
+    equals(coordinate) {
+        if (this == coordinate)
+            return true;
+        if (coordinate == null)
+            return false;
+        return this.#column === coordinate.#column && this.#row === coordinate.#row;
+    }
     toString(){
         return `Coordinate [row=${this.#row} column=${this.#column}]`;
     }
@@ -143,7 +154,7 @@ class Coordinate {
 
 class Line {
     
-    static LENGHT = 4;
+    static LENGTH = 4;
     #origin;
     #coordinates;
     #oppositeDirection;
@@ -152,12 +163,12 @@ class Line {
         this.#origin = coordinate;
     }
 
-    set(direction){
+    set(direction) {
         this.#coordinates = [this.#origin];
-        for (let i = 1; i < Line.LENGHT; i++) {
-            this.#coordinates[i] = this.#coordinates[i -1].shifted(Direction.getCoordinate());
+        for (let i = 1; i < Line.LENGTH; i++) {
+            this.#coordinates[i] = this.#coordinates[i - 1].shifted(direction.getCoordinate());
         }
-        this.#oppositeDirection = direction.getOpposite() ;
+        this.#oppositeDirection = direction.getOpposite();
     }
     shift(){
         for (let i = 0; i < Line.LENGHT; i++) {
@@ -239,7 +250,7 @@ class TurnView {
         let column;
         do {
             console.writeln(`${Message.TURN.getString()}${this.#game.getColorActive()}`)
-            column = console.readString(Message.ENTER_COLUMN.write()) -1;
+            column = console.readNumber(Message.ENTER_COLUMN.write()) -1;
             valid = Coordinate.isColValid(column);
             if (!valid){
                 Message.INVALID_COLUMN.writeln();
@@ -282,18 +293,12 @@ class Board{
                 this.#colors[i][j] = Color.NULL;
             }
         }
-        // ------[fila][columna] --------------
-        // for (let i = 0; i < Coordinate.NUM_ROWS; i++) {
-        //     for (let j = 0; j < Coordinate.NUM_COLS; j++) {
-        //         this.#colors[i][j] = Color.RED.toString()[0];
-        //     }
-        // }
-        // this.#colors[5][5] = Color.NULL;
-        // this.#colors[5][6] = Color.NULL;
     }
+
     getColor(coordinate) {
         return this.#colors[coordinate.getRow()][coordinate.getColumn()];
     }
+
     isComplete(col){
         if (this.isEmpty( new Coordinate( Coordinate.NUM_ROWS - 1, col) )){
             return false
@@ -307,31 +312,55 @@ class Board{
         }
         return iscomp;
     }
+
     isOccupied(coordinate, color) {
         return this.getColor(coordinate) == color;
     }
+
     isEmpty(coordinate) {
         return this.isOccupied(coordinate, Color.NULL);
     }
+
     isFinished(){
         return this.isCompleteBoard() || this.isWinner();
     }
-    isWinner(){
-        let line = new Line(this.#lastDrop);
-        for (let direction of Direction.values().splice(0,3)) {
-            line.set(direction);
-            for (let i = 0; i < Line.LENGHT; i++) {
-               if(this.isConnetc4(line)){
-                    return true
-               }
-               line.shift();
-            }
-            
+
+    isWinner() {
+        if (this.#lastDrop === undefined) {
+            return false;
         }
+        let line = new Line(this.#lastDrop);
+        for (let direction of Direction.values().splice(0, 4)) {
+            line.set(direction);
+            for (let i = 0; i < Line.LENGTH; i++) {
+                if (this.isConnect4(line)) {
+                    console.writeln('poraqui')
+                    return true;
+                }
+                line.shift();
+            }
+        }
+
+        return false;
     }
+
+    isConnect4(line) {
+        let coordinates = line.getCoordinates();
+        for (let i = 0; i < Line.LENGTH; i++) {
+            if (!coordinates[i].isValid()) {
+                return false;
+            }
+            if (i > 0 && this.getColor(coordinates[i - 1]) != this.getColor(coordinates[i])) {
+                console.writeln(this.getColor(coordinates[i - 1]));
+                console.writeln(this.getColor(coordinates[i]));
+                return false;
+            }
+        }
+        return true;
+    }
+
     dropToken(col, color){
         this.#lastDrop = new Coordinate(0, col)
-        console.writeln( `ficha puesta en la fila ${this.#lastDrop.getRow() +1} col ${this.#lastDrop.getColumn() +1} `)
         while (!this.isEmpty(this.#lastDrop)) {
             this.#lastDrop = this.#lastDrop.shifted(Direction.NORTH.getCoordinate())
         }

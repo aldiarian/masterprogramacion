@@ -215,7 +215,7 @@ class Board {
             return false;
         }
         let line = new Line(this.#lastDrop);
-        for (let direction of Direction.values().splice(0, 3)) {
+        for (let direction of Direction.values().splice(0, 4)) {
             line.set(direction);
             for (let i = 0; i < Line.LENGTH; i++) {
                 if (this.isConnect4(line)) {
@@ -224,6 +224,7 @@ class Board {
                 line.shift();
             }
         }
+
         return false;
     }
 
